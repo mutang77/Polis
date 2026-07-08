@@ -364,43 +364,107 @@
         </div>
 
         <div class="login-card">
-            <h2 class="login-card-title">Log Masuk ke Sistem</h2>
-            <p class="login-card-desc">Sila masukkan kelayakan anda untuk mengakses dashboard analisis jenayah.</p>
+            <!-- LOGIN CARD CONTENT -->
+            <div id="login-form-wrapper">
+                <h2 class="login-card-title">Log Masuk ke Sistem</h2>
+                <p class="login-card-desc">Sila masukkan kelayakan anda untuk mengakses dashboard analisis jenayah.</p>
 
-            <div class="login-error" id="login-error">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="login-error-text">Nama pengguna atau kata laluan salah.</span>
+                <div class="login-error" id="login-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="login-error-text">Nama pengguna atau kata laluan salah.</span>
+                </div>
+
+                <form id="login-form" autocomplete="off">
+                    <div class="form-group">
+                        <label class="form-label" for="login-username">
+                            <i class="fas fa-user"></i> Nama Pengguna
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input type="text" id="login-username" class="form-input" placeholder="cth: admin" required>
+                            <i class="fas fa-user form-input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">
+                            <i class="fas fa-lock"></i> Kata Laluan
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input type="password" id="login-password" class="form-input" placeholder="Masukkan kata laluan" required>
+                            <i class="fas fa-lock form-input-icon"></i>
+                            <button type="button" class="password-toggle" id="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 20px;">
+                        <a href="#" id="link-forgot-password" style="color: var(--color-cyan); font-size: 0.78rem; text-decoration: none; font-weight: 500;">Lupa kata laluan?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="login-btn">
+                        <span class="btn-text">LOG MASUK</span>
+                        <div class="btn-spinner"></div>
+                    </button>
+                </form>
             </div>
 
-            <form id="login-form" autocomplete="off">
-                <div class="form-group">
-                    <label class="form-label" for="login-username">
-                        <i class="fas fa-user"></i> Nama Pengguna
-                    </label>
-                    <div class="form-input-wrapper">
-                        <input type="text" id="login-username" class="form-input" placeholder="cth: admin" required>
-                        <i class="fas fa-user form-input-icon"></i>
-                    </div>
+            <!-- FORGOT PASSWORD CARD CONTENT (Hidden by default) -->
+            <div id="forgot-form-wrapper" style="display: none;">
+                <h2 class="login-card-title">Lupa Kata Laluan?</h2>
+                <p class="login-card-desc">Sila masukkan nama pengguna dan e-mel rasmi untuk menetapkan semula kata laluan anda.</p>
+
+                <div class="login-error" id="forgot-error" style="color: var(--color-red); border-color: rgba(255, 49, 49, 0.3);">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="forgot-error-text">Maklumat pengesahan tidak sah.</span>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="login-password">
-                        <i class="fas fa-lock"></i> Kata Laluan
-                    </label>
-                    <div class="form-input-wrapper">
-                        <input type="password" id="login-password" class="form-input" placeholder="Masukkan kata laluan" required>
-                        <i class="fas fa-lock form-input-icon"></i>
-                        <button type="button" class="password-toggle" id="toggle-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
+                <div class="login-error" id="forgot-success" style="display: none; background: rgba(57, 255, 20, 0.08); border: 1px solid rgba(57, 255, 20, 0.25); color: var(--color-green); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; align-items: center; gap: 8px; margin-bottom: 16px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Kata laluan berjaya diset semula! Sila log masuk.</span>
                 </div>
 
-                <button type="submit" class="login-btn" id="login-btn">
-                    <span class="btn-text">LOG MASUK</span>
-                    <div class="btn-spinner"></div>
-                </button>
-            </form>
+                <form id="forgot-form" autocomplete="off">
+                    <div class="form-group">
+                        <label class="form-label" for="forgot-username">
+                            <i class="fas fa-user"></i> Nama Pengguna
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input type="text" id="forgot-username" class="form-input" placeholder="cth: admin" required>
+                            <i class="fas fa-user form-input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="forgot-email">
+                            <i class="fas fa-envelope"></i> E-mel Rasmi PDRM
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input type="email" id="forgot-email" class="form-input" placeholder="cth: admin@rmp.gov.my" required>
+                            <i class="fas fa-envelope form-input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="forgot-new-password">
+                            <i class="fas fa-key"></i> Kata Laluan Baharu
+                        </label>
+                        <div class="form-input-wrapper">
+                            <input type="password" id="forgot-new-password" class="form-input" placeholder="Masukkan kata laluan baharu" required>
+                            <i class="fas fa-key form-input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="forgot-btn">
+                        <span class="btn-text">SET SEMULA KATA LALUAN</span>
+                        <div class="btn-spinner"></div>
+                    </button>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="#" id="link-back-login" style="color: var(--text-secondary); font-size: 0.8rem; text-decoration: none;">Kembali ke Log Masuk</a>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="login-security-note">
@@ -427,6 +491,43 @@
             particleContainer.appendChild(p);
         }
 
+        // Initialize PDRM User Database in localStorage if it doesn't exist
+        let users = JSON.parse(localStorage.getItem('pdrm_users'));
+        if (!users) {
+            users = {
+                'admin': { 'password': 'pdrm2025', 'name': 'Admin IPK Selangor', 'role': 'admin', 'email': 'admin@rmp.gov.my' },
+                'pegawai': { 'password': 'polis123', 'name': 'Pegawai Ops', 'role': 'user', 'email': 'pegawai@rmp.gov.my' }
+            };
+            localStorage.setItem('pdrm_users', JSON.stringify(users));
+        }
+
+        // Form toggle handlers
+        const loginWrapper = document.getElementById('login-form-wrapper');
+        const forgotWrapper = document.getElementById('forgot-form-wrapper');
+        const linkForgot = document.getElementById('link-forgot-password');
+        const linkBack = document.getElementById('link-back-login');
+        const loginError = document.getElementById('login-error');
+        const forgotError = document.getElementById('forgot-error');
+        const forgotSuccess = document.getElementById('forgot-success');
+
+        linkForgot.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginWrapper.style.display = 'none';
+            forgotWrapper.style.display = 'block';
+            loginError.classList.remove('visible');
+            forgotError.style.display = 'none';
+            forgotSuccess.style.display = 'none';
+            document.getElementById('forgot-form').reset();
+        });
+
+        linkBack.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotWrapper.style.display = 'none';
+            loginWrapper.style.display = 'block';
+            loginError.classList.remove('visible');
+            document.getElementById('login-form').reset();
+        });
+
         // Password visibility toggle
         document.getElementById('toggle-password').addEventListener('click', function() {
             const pw = document.getElementById('login-password');
@@ -440,49 +541,76 @@
             }
         });
 
-        // Login form submit
+        // Login form submit (Client-side simulation checking localStorage)
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
-            const errorEl = document.getElementById('login-error');
             const errorText = document.getElementById('login-error-text');
             const loginBtn = document.getElementById('login-btn');
 
-            // Clear previous errors
-            errorEl.classList.remove('visible');
+            loginError.classList.remove('visible');
             loginBtn.classList.add('loading');
             loginBtn.disabled = true;
 
-            // Submit to backend API
-            fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            })
-            .then(r => r.json())
-            .then(data => {
+            setTimeout(() => {
                 loginBtn.classList.remove('loading');
                 loginBtn.disabled = false;
 
-                if (data.success) {
-                    // Store session token
-                    sessionStorage.setItem('pdrm_token', data.token);
-                    sessionStorage.setItem('pdrm_user', data.user);
-                    // Redirect to dashboard
+                // Load fresh user data from localStorage
+                const activeUsers = JSON.parse(localStorage.getItem('pdrm_users')) || users;
+                const user = activeUsers[username];
+                if (user && user.password === password) {
+                    const token = 'token_' + Math.random().toString(36).substr(2, 9);
+                    sessionStorage.setItem('pdrm_token', token);
+                    sessionStorage.setItem('pdrm_user', user.name);
+                    sessionStorage.setItem('pdrm_username', username);
                     window.location.href = '/index.html';
                 } else {
-                    errorText.textContent = data.message || 'Nama pengguna atau kata laluan salah.';
-                    errorEl.classList.add('visible');
+                    errorText.textContent = 'Nama pengguna atau kata laluan salah. Sila cuba semula.';
+                    loginError.classList.add('visible');
                 }
-            })
-            .catch(err => {
-                loginBtn.classList.remove('loading');
-                loginBtn.disabled = false;
-                errorText.textContent = 'Ralat sambungan pelayan. Sila cuba semula.';
-                errorEl.classList.add('visible');
-            });
+            }, 500);
+        });
+
+        // Forgot password form submit (Client-side reset updating localStorage)
+        document.getElementById('forgot-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('forgot-username').value.trim();
+            const email = document.getElementById('forgot-email').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const errorText = document.getElementById('forgot-error-text');
+            const forgotBtn = document.getElementById('forgot-btn');
+
+            forgotError.style.display = 'none';
+            forgotSuccess.style.display = 'none';
+            forgotBtn.classList.add('loading');
+            forgotBtn.disabled = true;
+
+            setTimeout(() => {
+                forgotBtn.classList.remove('loading');
+                forgotBtn.disabled = false;
+
+                // Load fresh user data
+                const activeUsers = JSON.parse(localStorage.getItem('pdrm_users')) || users;
+                const user = activeUsers[username];
+
+                if (user && user.email === email) {
+                    // Update user's password
+                    user.password = newPassword;
+                    activeUsers[username] = user;
+                    localStorage.setItem('pdrm_users', JSON.stringify(activeUsers));
+
+                    // Show success
+                    forgotSuccess.style.display = 'flex';
+                    document.getElementById('forgot-form').reset();
+                } else {
+                    errorText.textContent = 'Nama pengguna atau e-mel rasmi tidak sepadan. Sila cuba semula.';
+                    forgotError.style.display = 'flex';
+                }
+            }, 600);
         });
 
         // Check if already logged in

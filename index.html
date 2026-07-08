@@ -117,6 +117,12 @@
                         <span>Muat Turun PDF</span>
                     </button>
 
+                    <!-- Change Password Button -->
+                    <button id="btn-open-change-pw" class="header-btn theme-btn" style="background: rgba(16, 185, 129, 0.08); color: #10b981; border-color: rgba(16, 185, 129, 0.2);" title="Tukar Kata Laluan">
+                        <i class="fas fa-key"></i>
+                        <span>Tukar Kata Laluan</span>
+                    </button>
+
                     <!-- Upload Data Button -->
                     <button id="btn-upload-csv" class="header-btn upload-btn" title="Muat Naik Fail CSV/XLS">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -419,6 +425,53 @@
                 <button id="btn-cancel-upload" class="modal-btn modal-btn-secondary">Batal</button>
                 <button id="btn-submit-upload" class="modal-btn modal-btn-primary" disabled>
                     <i class="fas fa-upload"></i> Muat Naik & Proses
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="change-pw-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <img src="pdrm_logo.png" alt="PDRM" class="modal-logo">
+                    <div>
+                        <h2>Tukar Kata Laluan</h2>
+                        <p class="modal-subtitle">Sila masukkan kata laluan semasa dan kata laluan baharu anda.</p>
+                    </div>
+                </div>
+                <button id="change-pw-close" class="modal-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="login-error" id="change-pw-error" style="display:none; color: var(--color-red); border-color: rgba(255, 49, 49, 0.3); margin-top: 0; margin-bottom: 16px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="change-pw-error-text">Kata laluan semasa salah.</span>
+                </div>
+                <div class="login-error" id="change-pw-success" style="display: none; background: rgba(57, 255, 20, 0.08); border: 1px solid rgba(57, 255, 20, 0.25); color: var(--color-green); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 16px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Kata laluan berjaya ditukar!</span>
+                </div>
+
+                <form id="change-pw-form" autocomplete="off">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Kata Laluan Semasa</label>
+                        <input type="password" id="change-pw-current" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Kata Laluan Baharu</label>
+                        <input type="password" id="change-pw-new" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Sahkan Kata Laluan Baharu</label>
+                        <input type="password" id="change-pw-confirm" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-change-pw" class="modal-btn modal-btn-secondary">Batal</button>
+                <button id="btn-submit-change-pw" class="modal-btn modal-btn-primary">
+                    <i class="fas fa-check"></i> Kemas Kini Kata Laluan
                 </button>
             </div>
         </div>

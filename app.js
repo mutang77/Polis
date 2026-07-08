@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDashboardData();
     setupEventListeners();
     setupUploadModal();
+    setupChangePasswordModal();
     setupLogout();
 });
 
@@ -510,6 +511,95 @@ function setupUploadModal() {
 
     // Submit upload
     submitBtn.addEventListener('click', () => uploadCSV());
+}
+
+function setupChangePasswordModal() {
+    const modal = document.getElementById('change-pw-modal');
+    const openBtn = document.getElementById('btn-open-change-pw');
+    const closeBtn = document.getElementById('change-pw-close');
+    const cancelBtn = document.getElementById('btn-cancel-change-pw');
+    const submitBtn = document.getElementById('btn-submit-change-pw');
+    const form = document.getElementById('change-pw-form');
+    
+    const errorEl = document.getElementById('change-pw-error');
+    const errorText = document.getElementById('change-pw-error-text');
+    const successEl = document.getElementById('change-pw-success');
+    
+    if (!modal || !openBtn) return;
+    
+    const resetModal = () => {
+        form.reset();
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+    };
+    
+    // Open
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        resetModal();
+    });
+    
+    // Close
+    const closeModal = () => {
+        modal.style.display = 'none';
+        resetModal();
+    };
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    
+    // Submit
+    submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        const currentPw = document.getElementById('change-pw-current').value;
+        const newPw = document.getElementById('change-pw-new').value;
+        const confirmPw = document.getElementById('change-pw-confirm').value;
+        
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+        
+        if (!currentPw || !newPw || !confirmPw) {
+            errorText.textContent = 'Sila isi semua ruangan.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        
+        if (newPw !== confirmPw) {
+            errorText.textContent = 'Kata laluan baharu dan sahkan kata laluan tidak sepadan.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        
+        // Load active users
+        const activeUsers = JSON.parse(localStorage.getItem('pdrm_users'));
+        const currentUsername = sessionStorage.getItem('pdrm_username') || 'admin';
+        
+        if (activeUsers && activeUsers[currentUsername]) {
+            const user = activeUsers[currentUsername];
+            if (user.password === currentPw) {
+                // Update password
+                user.password = newPw;
+                activeUsers[currentUsername] = user;
+                localStorage.setItem('pdrm_users', JSON.stringify(activeUsers));
+                
+                // Show success
+                successEl.style.display = 'flex';
+                form.reset();
+                
+                // Close after 1.5s
+                setTimeout(() => {
+                    closeModal();
+                }, 1500);
+            } else {
+                errorText.textContent = 'Kata laluan semasa salah.';
+                errorEl.style.display = 'block';
+            }
+        } else {
+            errorText.textContent = 'Akaun tidak ditemui.';
+            errorEl.style.display = 'block';
+        }
+    });
 }
 
 function handleFileSelected(file) {
