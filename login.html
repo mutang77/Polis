@@ -12,7 +12,7 @@
     
     <style>
         :root {
-            --bg-primary: #030712;
+            --bg-primary: #050b14;
             --bg-card: rgba(11, 23, 49, 0.7);
             --border-glow: rgba(0, 240, 255, 0.15);
             --color-cyan: #00f0ff;
@@ -28,7 +28,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0f1d;
+            background-color: #050b14;
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -450,7 +450,7 @@
     </div>
 
     <script>
-        // Cyber Security Grid & Network Nodes Animation (Chrome & Safari Optimized)
+        // Cyber Command Room & Selangor Map Simulation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -462,28 +462,91 @@
             height = canvas.height = window.innerHeight;
         });
 
-        // Generate slow-moving nodes
-        const nodeCount = Math.min(40, Math.floor((width * height) / 35000)) || 15;
-        const nodes = [];
-        for (let i = 0; i < nodeCount; i++) {
-            nodes.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.15, // Very slow motion
-                vy: (Math.random() - 0.5) * 0.15,
-                radius: Math.random() * 1.8 + 1.2
+        // Bounding Box Selangor Coordinates
+        const minLon = 100.75, maxLon = 102.0;
+        const minLat = 2.5, maxLat = 3.9;
+
+        // Key operational nodes (districts coordinates)
+        const operNodes = [
+            { name: 'SHAH ALAM', lon: 101.5183, lat: 3.0738, color: '#00f0ff' },
+            { name: 'KLANG', lon: 101.4492, lat: 3.0333, color: '#39ff14' },
+            { name: 'PETALING JAYA', lon: 101.6067, lat: 3.1073, color: '#00f0ff' },
+            { name: 'GOMBAK', lon: 101.6667, lat: 3.2500, color: '#ff3131' },
+            { name: 'KAJANG', lon: 101.7900, lat: 2.9930, color: '#00f0ff' },
+            { name: 'SEPANG', lon: 101.6994, lat: 2.7533, color: '#ffd700' },
+            { name: 'SABAK BERNAM', lon: 100.8000, lat: 3.8000, color: '#39ff14' },
+            { name: 'KUALA SELANGOR', lon: 101.2500, lat: 3.3400, color: '#00f0ff' },
+            { name: 'KUALA LANGAT', lon: 101.4700, lat: 2.8500, color: '#00f0ff' },
+            { name: 'HULU SELANGOR', lon: 101.6500, lat: 3.5600, color: '#ffd700' }
+        ];
+
+        let selangorGeoJSON = null;
+        let scanOffset = 0;
+        let radarAngle = 0;
+        let pulseVal = 0;
+        let blinkCounter = 0;
+
+        // Fetch Selangor GeoJSON for background map rendering
+        fetch('selangor_districts.geojson')
+            .then(r => {
+                if (!r.ok) throw new Error();
+                return r.json();
+            })
+            .then(data => {
+                selangorGeoJSON = data;
+            })
+            .catch(() => console.log('Background GeoJSON loaded offline fallback'));
+
+        // Mercator Projection Mapper to fit Map to Screen bounds
+        function project(lon, lat) {
+            const mapWidth = maxLon - minLon;
+            const mapHeight = maxLat - minLat;
+            
+            // Maintain map aspect ratio
+            const mapAspect = mapWidth / mapHeight;
+            const screenAspect = width / height;
+            
+            let scale, xOffset, yOffset;
+            
+            if (screenAspect > mapAspect) {
+                // Wide screen: scale by height
+                scale = (height * 0.78) / mapHeight;
+                xOffset = (width - mapWidth * scale) / 2;
+                yOffset = height * 0.11;
+            } else {
+                // Tall screen: scale by width
+                scale = (width * 0.78) / mapWidth;
+                xOffset = width * 0.11;
+                yOffset = (height - mapHeight * scale) / 2;
+            }
+            
+            const x = xOffset + (lon - minLon) * scale;
+            const y = height - (yOffset + (lat - minLat) * scale); // Invert Y for canvas coordinate space
+            return { x, y };
+        }
+
+        function drawPolygon(polygonCoords) {
+            polygonCoords.forEach(ring => {
+                if (ring.length === 0) return;
+                const start = project(ring[0][0], ring[0][1]);
+                ctx.moveTo(start.x, start.y);
+                for (let i = 1; i < ring.length; i++) {
+                    const pt = project(ring[i][0], ring[i][1]);
+                    ctx.lineTo(pt.x, pt.y);
+                }
             });
         }
 
         function draw() {
-            // Base background
-            ctx.fillStyle = '#0a0f1d';
+            // Background base tactical navy
+            ctx.fillStyle = '#050b14';
             ctx.fillRect(0, 0, width, height);
 
-            // Draw faint security grid
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.02)';
+            // 1. Faded Digital Grid Overlay
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.012)';
             ctx.lineWidth = 0.5;
-            const gridSize = 50;
+            const gridSize = 60;
+            
             ctx.beginPath();
             for (let x = 0; x < width; x += gridSize) {
                 ctx.moveTo(x, 0);
@@ -495,41 +558,94 @@
             }
             ctx.stroke();
 
-            // Update & Draw nodes
-            ctx.fillStyle = 'rgba(0, 240, 255, 0.65)';
-            nodes.forEach(node => {
-                node.x += node.vx;
-                node.y += node.vy;
-
-                // Boundary bounce
-                if (node.x < 0 || node.x > width) node.vx *= -1;
-                if (node.y < 0 || node.y > height) node.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Draw connecting lines
-            ctx.lineWidth = 0.4;
-            for (let i = 0; i < nodes.length; i++) {
-                for (let j = i + 1; j < nodes.length; j++) {
-                    const dx = nodes[i].x - nodes[j].x;
-                    const dy = nodes[i].y - nodes[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    // Connect if close enough
-                    if (dist < 140) {
-                        const alpha = (1 - dist / 140) * 0.07; // Very faint alpha line
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
-                        ctx.beginPath();
-                        ctx.moveTo(nodes[i].x, nodes[i].y);
-                        ctx.lineTo(nodes[j].x, nodes[j].y);
-                        ctx.stroke();
-                    }
+            // Draw grid dots at intersections
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.06)';
+            for (let x = 0; x < width; x += gridSize) {
+                for (let y = 0; y < height; y += gridSize) {
+                    ctx.fillRect(x - 1, y - 1, 2, 2);
                 }
             }
 
+            // 2. Render Selangor Map wireframe boundaries
+            if (selangorGeoJSON) {
+                ctx.strokeStyle = 'rgba(0, 240, 255, 0.05)';
+                ctx.lineWidth = 0.8;
+                
+                // scanning line dashed effect
+                ctx.setLineDash([5, 12]);
+                ctx.lineDashOffset = -scanOffset;
+                
+                ctx.beginPath();
+                selangorGeoJSON.features.forEach(feature => {
+                    const coords = feature.geometry.coordinates;
+                    const type = feature.geometry.type;
+                    
+                    if (type === 'Polygon') {
+                        drawPolygon(coords);
+                    } else if (type === 'MultiPolygon') {
+                        coords.forEach(poly => drawPolygon(poly));
+                    }
+                });
+                ctx.stroke();
+                ctx.setLineDash([]); // Reset
+            }
+
+            // 3. Operational Nodes pulsing glow
+            pulseVal += 0.045;
+            operNodes.forEach(node => {
+                const pt = project(node.lon, node.lat);
+                
+                // Draw pulsing ring (low opacity)
+                const pulseRadius = 5 + Math.sin(pulseVal) * 8;
+                ctx.strokeStyle = node.color;
+                ctx.fillStyle = node.color;
+                
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pulseRadius, 0, Math.PI * 2);
+                ctx.lineWidth = 0.5;
+                ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - (pulseRadius / 13))})`;
+                ctx.stroke();
+                
+                // Solid core
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Faint target text labels
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+                ctx.font = '8px monospace';
+                ctx.fillText(node.name, pt.x + 8, pt.y + 3);
+            });
+
+            // 4. Rotating Radar sweep element
+            radarAngle += 0.005;
+            const rx = width - 90, ry = height - 90, rRadius = 60;
+            
+            // Radar base circles
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(rx, ry, rRadius, 0, Math.PI * 2);
+            ctx.arc(rx, ry, rRadius / 2, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Radar sweep sweep line
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.lineTo(rx + rRadius * Math.cos(radarAngle), ry + rRadius * Math.sin(radarAngle));
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.09)';
+            ctx.stroke();
+
+            // 5. Blinking Surveillance active text
+            blinkCounter++;
+            const blinkState = Math.floor(blinkCounter / 30) % 2 === 0;
+            ctx.fillStyle = blinkState ? 'rgba(0, 240, 255, 0.12)' : 'rgba(0, 240, 255, 0.04)';
+            ctx.font = '9px monospace';
+            ctx.fillText('SURVEILLANCE MODE: ACTIVE', 30, height - 35);
+            ctx.fillText('RMP CYBER COMMAND CONTROL ROOM', 30, height - 20);
+
+            // Increment animations
+            scanOffset += 0.35;
             requestAnimationFrame(draw);
         }
 
