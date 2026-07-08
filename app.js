@@ -46,9 +46,18 @@ const COLORS = {
 
 // Document Ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Check login session - redirect to login if not authenticated
+    const token = sessionStorage.getItem('pdrm_token');
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+
     initClock();
     fetchDashboardData();
     setupEventListeners();
+    setupUploadModal();
+    setupLogout();
 });
 
 // 1. Live Clock & Date Widget (Malaysian / System time)
@@ -238,6 +247,217 @@ function setupEventListeners() {
     window.addEventListener('resize', () => {
         Object.values(chartInstances).forEach(chart => {
             if (chart) chart.resize();
+        });
+    });
+}
+
+// ============================================================
+// Upload Modal Logic
+// ============================================================
+let selectedFile = null;
+
+function setupUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    const openBtn = document.getElementById('btn-upload-csv');
+    const closeBtn = document.getElementById('modal-close');
+    const cancelBtn = document.getElementById('btn-cancel-upload');
+    const browseBtn = document.getElementById('btn-browse');
+    const fileInput = document.getElementById('csv-file-input');
+    const dropzone = document.getElementById('upload-dropzone');
+    const submitBtn = document.getElementById('btn-submit-upload');
+    const removeBtn = document.getElementById('btn-remove-file');
+
+    if (!modal || !openBtn) return;
+
+    // Open modal
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        resetUploadModal();
+    });
+
+    // Close modal
+    const closeModal = () => { modal.style.display = 'none'; resetUploadModal(); };
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Browse button click
+    browseBtn.addEventListener('click', () => fileInput.click());
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFileSelected(e.target.files[0]);
+    });
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+    });
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('drag-over');
+    });
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.name.endsWith('.csv')) {
+                handleFileSelected(file);
+            } else {
+                showUploadStatus('Sila pilih fail berformat .csv sahaja.', 'error');
+            }
+        }
+    });
+
+    // Remove selected file
+    removeBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        document.getElementById('upload-file-info').style.display = 'none';
+        document.getElementById('upload-dropzone').style.display = 'flex';
+        submitBtn.disabled = true;
+        hideUploadStatus();
+    });
+
+    // Submit upload
+    submitBtn.addEventListener('click', () => uploadCSV());
+}
+
+function handleFileSelected(file) {
+    selectedFile = file;
+    document.getElementById('upload-dropzone').style.display = 'none';
+    document.getElementById('upload-file-info').style.display = 'block';
+    document.getElementById('upload-file-name').textContent = file.name;
+    document.getElementById('upload-file-size').textContent = formatFileSize(file.size);
+    document.getElementById('btn-submit-upload').disabled = false;
+    hideUploadStatus();
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function resetUploadModal() {
+    selectedFile = null;
+    const fileInput = document.getElementById('csv-file-input');
+    if (fileInput) fileInput.value = '';
+    const dropzone = document.getElementById('upload-dropzone');
+    if (dropzone) dropzone.style.display = 'flex';
+    const fileInfo = document.getElementById('upload-file-info');
+    if (fileInfo) fileInfo.style.display = 'none';
+    const submitBtn = document.getElementById('btn-submit-upload');
+    if (submitBtn) submitBtn.disabled = true;
+    const progress = document.getElementById('upload-progress');
+    if (progress) progress.style.display = 'none';
+    hideUploadStatus();
+}
+
+function showUploadStatus(message, type) {
+    const el = document.getElementById('upload-status');
+    if (!el) return;
+    el.style.display = 'block';
+    el.className = 'upload-status ' + (type === 'success' ? 'status-success' : 'status-error');
+    el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${message}`;
+}
+
+function hideUploadStatus() {
+    const el = document.getElementById('upload-status');
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+}
+
+function uploadCSV() {
+    if (!selectedFile) return;
+
+    const token = sessionStorage.getItem('pdrm_token');
+    if (!token) {
+        showUploadStatus('Sesi tidak sah. Sila log masuk semula.', 'error');
+        return;
+    }
+
+    const submitBtn = document.getElementById('btn-submit-upload');
+    const progressEl = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressText = document.getElementById('upload-progress-text');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    progressEl.style.display = 'flex';
+
+    // Simulate progress while uploading
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        if (progress < 90) {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.floor(progress) + '%';
+        }
+    }, 200);
+
+    const formData = new FormData();
+    formData.append('csvfile', selectedFile);
+
+    fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+
+        if (data.success) {
+            showUploadStatus(data.message, 'success');
+            // Reload dashboard data after short delay
+            setTimeout(() => {
+                fetchDashboardData();
+                // Close modal after 2s
+                setTimeout(() => {
+                    document.getElementById('upload-modal').style.display = 'none';
+                    resetUploadModal();
+                }, 2000);
+            }, 500);
+        } else {
+            showUploadStatus(data.message || 'Gagal memuat naik fail.', 'error');
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Muat Naik & Proses';
+    })
+    .catch(err => {
+        clearInterval(progressInterval);
+        showUploadStatus('Ralat sambungan pelayan. Sila cuba semula.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Muat Naik & Proses';
+    });
+}
+
+// ============================================================
+// Logout Logic
+// ============================================================
+function setupLogout() {
+    const logoutBtn = document.getElementById('btn-logout');
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener('click', () => {
+        const token = sessionStorage.getItem('pdrm_token');
+        fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + (token || ''),
+                'Content-Type': 'application/json'
+            },
+            body: '{}'
+        })
+        .finally(() => {
+            sessionStorage.removeItem('pdrm_token');
+            sessionStorage.removeItem('pdrm_user');
+            window.location.href = '/login.html';
         });
     });
 }
