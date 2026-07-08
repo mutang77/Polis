@@ -96,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupUploadModal();
     setupChangePasswordModal();
+    setupAddDataModal();
+    setupExportCSV();
     setupLogout();
 });
 
@@ -599,6 +601,133 @@ function setupChangePasswordModal() {
             errorText.textContent = 'Akaun tidak ditemui.';
             errorEl.style.display = 'block';
         }
+    });
+}
+
+// ============================================================
+// Add Data Modal (POC Data Management)
+// ============================================================
+function setupAddDataModal() {
+    const modal = document.getElementById('add-data-modal');
+    const openBtn = document.getElementById('btn-open-add-data');
+    const closeBtn = document.getElementById('add-data-close');
+    const cancelBtn = document.getElementById('btn-cancel-add-data');
+    const submitBtn = document.getElementById('btn-submit-add-data');
+    const form = document.getElementById('add-data-form');
+    const errorEl = document.getElementById('add-data-error');
+    const errorText = document.getElementById('add-data-error-text');
+    const successEl = document.getElementById('add-data-success');
+
+    if (!modal || !openBtn) return;
+
+    const resetModal = () => {
+        form.reset();
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+    };
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        resetModal();
+    };
+
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        resetModal();
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    submitBtn.addEventListener('click', () => {
+        const ipd = document.getElementById('add-data-ipd').value;
+        const jenis = document.getElementById('add-data-jenis').value;
+        const status = document.getElementById('add-data-status').value;
+
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+
+        if (!ipd || !jenis) {
+            errorText.textContent = 'Sila pilih IPD dan Jenis Jenayah.';
+            errorEl.style.display = 'flex';
+            return;
+        }
+
+        // Determine category from jenis selection
+        const violentTypes = ['Bunuh', 'Rogol', 'Samun', 'Mencederakan'];
+        const isViolent = violentTypes.some(t => jenis.includes(t));
+        const kategori = isViolent
+            ? 'Jenayah Kekerasan (Violent Crime)'
+            : 'Jenayah Harta Benda (Property Crime)';
+
+        // Add 1 dilaporkan; if Selesai add 1 penyelesaian too
+        const dilaporkan = 1;
+        const penyelesaian = status === 'Selesai' ? 1 : 0;
+
+        const newRecord = {
+            tahun: new Date().getFullYear(),
+            ipd: ipd,
+            kategori: kategori,
+            jenis: jenis,
+            dilaporkan: dilaporkan,
+            penyelesaian: penyelesaian
+        };
+
+        // Append into rawData
+        rawData.push(newRecord);
+
+        // Persist to localStorage cache
+        localStorage.setItem('pdrm_cached_data', JSON.stringify(rawData));
+
+        // Reactive re-render all charts and map
+        refreshDashboard();
+
+        // Show success banner
+        successEl.style.display = 'flex';
+
+        // Auto-close after 1.5s
+        setTimeout(() => closeModal(), 1500);
+    });
+}
+
+// ============================================================
+// Export Updated CSV
+// ============================================================
+function setupExportCSV() {
+    const exportBtn = document.getElementById('btn-export-csv');
+    if (!exportBtn) return;
+
+    exportBtn.addEventListener('click', () => {
+        if (!rawData || rawData.length === 0) {
+            alert('Tiada data untuk dieksport.');
+            return;
+        }
+
+        // Build CSV string with PDRM headers
+        const headers = ['Tahun (Year)', 'Daerah Polis (IPD)', 'Kategori Jenayah (Category)', 'Jenis Jenayah (Sub-Category)', 'Kes Dilaporkan (Reported Cases)', 'Kes Penyelesaian (Solved Cases)'];
+        const rows = rawData.map(item => [
+            item.tahun,
+            item.ipd,
+            item.kategori,
+            `"${item.jenis}"`, // Quote to handle commas in crime names
+            item.dilaporkan,
+            item.penyelesaian
+        ]);
+
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+        // Trigger browser download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const today = new Date().toISOString().slice(0, 10);
+        link.download = `pdrm_selangor_crime_data_${today}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     });
 }
 
@@ -1440,7 +1569,26 @@ function updateTable() {
                     <span class="progress-rate-num ${solveRate >= 65 ? 'text-green' : (solveRate >= 40 ? 'text-yellow' : 'text-red')}">${solveRate.toFixed(0)}%</span>
                 </div>
             </td>
+            <td class="text-center" style="position: relative; z-index: 20;">
+                <button class="btn-delete-row" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;" title="Padam Rekod">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
         `;
+        
+        // Handle delete action
+        const deleteBtn = row.querySelector('.btn-delete-row');
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop row selection filter
+            if (confirm(`Adakah anda pasti mahu memadam rekod ini untuk ${item.ipd} (${item.jenis})?`)) {
+                const idx = rawData.indexOf(item);
+                if (idx > -1) {
+                    rawData.splice(idx, 1);
+                    localStorage.setItem('pdrm_cached_data', JSON.stringify(rawData));
+                    refreshDashboard();
+                }
+            }
+        });
         
         // Click on row to select and filter by this IPD
         row.addEventListener('click', () => {

@@ -123,6 +123,18 @@
                         <span>Tukar Kata Laluan</span>
                     </button>
 
+                    <!-- Add Data Button -->
+                    <button id="btn-open-add-data" class="header-btn theme-btn" style="background: rgba(0, 240, 255, 0.08); color: #00f0ff; border-color: rgba(0, 240, 255, 0.2);" title="Tambah Kes Jenayah">
+                        <i class="fas fa-plus"></i>
+                        <span>Tambah Kes Jenayah</span>
+                    </button>
+
+                    <!-- Export CSV Button -->
+                    <button id="btn-export-csv" class="header-btn upload-btn" style="background: rgba(245, 158, 11, 0.08); color: #f59e0b; border-color: rgba(245, 158, 11, 0.2);" title="Muat Turun Fail Kemas Kini (CSV)">
+                        <i class="fas fa-download"></i>
+                        <span>Export CSV Kemas Kini</span>
+                    </button>
+
                     <!-- Upload Data Button -->
                     <button id="btn-upload-csv" class="header-btn upload-btn" title="Muat Naik Fail CSV/XLS">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -339,8 +351,9 @@
                                             class="fas fa-sort"></i></th>
                                     <th data-sort="solved" class="text-right">Kes Penyelesaian <i
                                             class="fas fa-sort"></i></th>
-                                    <th data-sort="solve_rate" class="text-center" style="width: 250px;">Kadar
+                                    <th data-sort="solve_rate" class="text-center" style="width: 200px;">Kadar
                                         Penyelesaian <i class="fas fa-sort"></i></th>
+                                    <th class="text-center" style="width: 100px;">Tindakan</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
@@ -472,6 +485,95 @@
                 <button id="btn-cancel-change-pw" class="modal-btn modal-btn-secondary">Batal</button>
                 <button id="btn-submit-change-pw" class="modal-btn modal-btn-primary">
                     <i class="fas fa-check"></i> Kemas Kini Kata Laluan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD DATA MODAL -->
+    <div id="add-data-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <img src="pdrm_logo.png" alt="PDRM" class="modal-logo">
+                    <div>
+                        <h2>Tambah Kes Jenayah Baru</h2>
+                        <p class="modal-subtitle">Sila masukkan butiran kes di bawah untuk pengesahan POC.</p>
+                    </div>
+                </div>
+                <button id="add-data-close" class="modal-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="login-error" id="add-data-error" style="display:none; color: var(--color-red); border-color: rgba(255, 49, 49, 0.3); margin-top: 0; margin-bottom: 16px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="add-data-error-text">Sila isi semua ruangan.</span>
+                </div>
+                <div class="login-error" id="add-data-success" style="display: none; background: rgba(57, 255, 20, 0.08); border: 1px solid rgba(57, 255, 20, 0.25); color: var(--color-green); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 16px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Rekod berjaya ditambahkan ke dalam sistem!</span>
+                </div>
+
+                <form id="add-data-form" autocomplete="off">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Daerah Selangor (IPD)</label>
+                        <select id="add-data-ipd" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                            <option value="" disabled selected>Pilih IPD...</option>
+                            <option value="IPD Petaling Jaya">IPD Petaling Jaya</option>
+                            <option value="IPD Shah Alam">IPD Shah Alam</option>
+                            <option value="IPD Klang Utara">IPD Klang Utara</option>
+                            <option value="IPD Klang Selatan">IPD Klang Selatan</option>
+                            <option value="IPD Gombak">IPD Gombak</option>
+                            <option value="IPD Kajang">IPD Kajang</option>
+                            <option value="IPD Ampang Jaya">IPD Ampang Jaya</option>
+                            <option value="IPD Serdang">IPD Serdang</option>
+                            <option value="IPD Subang Jaya">IPD Subang Jaya</option>
+                            <option value="IPD Sepang">IPD Sepang</option>
+                            <option value="IPD Kuala Langat">IPD Kuala Langat</option>
+                            <option value="IPD Kuala Selangor">IPD Kuala Selangor</option>
+                            <option value="IPD Hulu Selangor">IPD Hulu Selangor</option>
+                            <option value="IPD Sabak Bernam">IPD Sabak Bernam</option>
+                            <option value="IPD Sungai Buloh">IPD Sungai Buloh</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Jenis Jenayah</label>
+                        <select id="add-data-jenis" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                            <option value="" disabled selected>Pilih Jenis Jenayah...</option>
+                            <!-- Violent Crimes -->
+                            <optgroup label="Jenayah Kekerasan">
+                                <option value="Bunuh (Murder)">Bunuh (Murder)</option>
+                                <option value="Rogol (Rape)">Rogol (Rape)</option>
+                                <option value="Samun Berkawan Bersenjata (Armed Gang Robbery)">Samun Berkawan Bersenjata (Armed Gang Robbery)</option>
+                                <option value="Samun Tanpa Senjata (Unarmed Robbery)">Samun Tanpa Senjata (Unarmed Robbery)</option>
+                                <option value="Mencederakan (Causing Injury)">Mencederakan (Causing Injury)</option>
+                            </optgroup>
+                            <!-- Property Crimes -->
+                            <optgroup label="Jenayah Harta Benda">
+                                <option value="Pecah Rumah & Curi (Housebreaking & Theft)">Pecah Rumah & Curi (Housebreaking & Theft)</option>
+                                <option value="Curi Kereta (Car Theft)">Curi Kereta (Car Theft)</option>
+                                <option value="Curi Motosikal (Motorcycle Theft)">Curi Motosikal (Motorcycle Theft)</option>
+                                <option value="Curi Lori/Van (Lorry/Van Theft)">Curi Lori/Van (Lorry/Van Theft)</option>
+                                <option value="Curi-curi Lain (Other Theft)">Curi-curi Lain (Other Theft)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Tarikh Kes</label>
+                        <input type="date" id="add-data-date" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label class="form-label" style="font-size: 0.75rem; font-weight:600; color: var(--color-text-secondary); margin-bottom: 5px; display:block;">Status Kes</label>
+                        <select id="add-data-status" class="form-input" style="padding: 10px 12px; background: rgba(3,7,18,0.6); border: 1px solid var(--border-color); color:#fff; border-radius:8px; width:100%; box-sizing:border-box; outline:none;" required>
+                            <option value="Selesai">Selesai (Solved)</option>
+                            <option value="Siasatan">Siasatan (Under Investigation)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-add-data" class="modal-btn modal-btn-secondary">Batal</button>
+                <button id="btn-submit-add-data" class="modal-btn modal-btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Rekod Kes
                 </button>
             </div>
         </div>
