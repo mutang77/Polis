@@ -21,6 +21,12 @@
 
     <!-- Apache ECharts CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+
+    <!-- SheetJS CDN (for parsing XLS/XLSX) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- html2pdf CDN (for downloading PDF report) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body class="dashboard-theme-dark">
@@ -48,15 +54,6 @@
             <!-- Flexible spacer -->
             <div class="header-spacer"></div>
 
-            <!-- System Status Pill -->
-            <div class="hud-status">
-                <span class="pulse-indicator"></span>
-                <span class="hud-status-text">SISTEM AKTIF &amp; DIKEMAS KINI</span>
-            </div>
-
-            <!-- Divider -->
-            <div class="header-divider"></div>
-
             <!-- Date & Time Widget -->
             <div class="time-widget">
                 <span id="live-time" class="time-display">00:00:00 AM</span>
@@ -74,11 +71,16 @@
                 </select>
             </div>
 
-            <!-- Upload CSV Button -->
-            <button id="btn-upload-csv" class="header-btn upload-btn" title="Muat Naik Fail CSV">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Muat Naik CSV</span>
-            </button>
+            <!-- View Period Filter (Day, Week, Month, Year) -->
+            <div class="filter-widget">
+                <label for="period-selector" class="filter-label"><i class="fas fa-calendar-alt"></i> Paparan:</label>
+                <select id="period-selector" class="ipd-select">
+                    <option value="year">Tahun</option>
+                    <option value="month" selected>Bulan</option>
+                    <option value="week">Minggu</option>
+                    <option value="day">Hari</option>
+                </select>
+            </div>
 
             <!-- Logout Button -->
             <button id="btn-logout" class="header-btn logout-btn" title="Log Keluar">
@@ -90,6 +92,38 @@
 
         <!-- MAIN LAYOUT -->
         <main class="dashboard-main">
+
+            <!-- TOOLBAR / CONTROL PANEL -->
+            <section class="toolbar-row">
+                <div class="toolbar-title">
+                    <i class="fas fa-sliders-h text-cyan"></i>
+                    <span>TINDAKAN &amp; LAPORAN SISTEM</span>
+                </div>
+                <div class="toolbar-actions">
+                    <!-- Theme Toggle Button -->
+                    <button id="btn-theme-toggle" class="header-btn theme-btn" title="Tukar Tema (Terang/Gelap)">
+                        <i class="fas fa-sun"></i>
+                        <span>Tukar Tema</span>
+                    </button>
+
+                    <!-- PDF/Print Actions -->
+                    <button id="btn-print" class="header-btn print-btn" title="Cetak Laporan">
+                        <i class="fas fa-print"></i>
+                        <span>Cetak Laporan</span>
+                    </button>
+
+                    <button id="btn-pdf" class="header-btn pdf-btn" title="Muat Turun Laporan PDF">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Muat Turun PDF</span>
+                    </button>
+
+                    <!-- Upload Data Button -->
+                    <button id="btn-upload-csv" class="header-btn upload-btn" title="Muat Naik Fail CSV/XLS">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Muat Naik Data (Excel/CSV)</span>
+                    </button>
+                </div>
+            </section>
 
             <!-- KPI CARDS ROW -->
             <section class="kpi-row">
@@ -223,10 +257,10 @@
                 <div class="grid-col col-right">
                     <div class="dashboard-panel chart-panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-spider panel-icon"></i> Profil Kadar Selesai (Radar)</h3>
+                            <h3><i class="fas fa-chart-line panel-icon"></i> Trend Kes Garis Masa</h3>
                         </div>
                         <div class="panel-body">
-                            <div id="chart-radar" class="echarts-container"></div>
+                            <div id="chart-trend" class="echarts-container"></div>
                         </div>
                     </div>
 
@@ -338,14 +372,14 @@
         </footer>
     </div>
 
-    <!-- CSV UPLOAD MODAL -->
+    <!-- CSV/EXCEL UPLOAD MODAL -->
     <div id="upload-modal" class="modal-overlay" style="display:none;">
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-title-group">
                     <img src="pdrm_logo.png" alt="PDRM" class="modal-logo">
                     <div>
-                        <h2>Muat Naik Data CSV</h2>
+                        <h2>Muat Naik Data (CSV / Excel)</h2>
                         <p class="modal-subtitle">Format: Tahun, IPD, Kategori, Jenis, Dilaporkan, Penyelesaian</p>
                     </div>
                 </div>
@@ -356,14 +390,14 @@
                     <div class="dropzone-icon">
                         <i class="fas fa-cloud-upload-alt"></i>
                     </div>
-                    <p class="dropzone-text">Seret & Lepas fail CSV anda di sini</p>
+                    <p class="dropzone-text">Seret &amp; Lepas fail CSV / Excel (.xls, .xlsx) di sini</p>
                     <p class="dropzone-subtext">atau klik untuk pilih fail</p>
-                    <input type="file" id="csv-file-input" accept=".csv" style="display:none;">
-                    <button id="btn-browse" class="browse-btn">Pilih Fail CSV</button>
+                    <input type="file" id="csv-file-input" accept=".csv, .xls, .xlsx" style="display:none;">
+                    <button id="btn-browse" class="browse-btn">Pilih Fail Data</button>
                 </div>
                 <div id="upload-file-info" class="upload-file-info" style="display:none;">
                     <div class="file-info-row">
-                        <i class="fas fa-file-csv file-icon"></i>
+                        <i class="fas fa-file-excel file-icon" id="file-type-icon"></i>
                         <div class="file-details">
                             <span class="file-name" id="upload-file-name">-</span>
                             <span class="file-size" id="upload-file-size">-</span>
