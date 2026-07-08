@@ -12,7 +12,7 @@
     
     <style>
         :root {
-            --bg-primary: #050b14;
+            --bg-primary: #060b13;
             --bg-card: rgba(11, 23, 49, 0.7);
             --border-glow: rgba(0, 240, 255, 0.15);
             --color-cyan: #00f0ff;
@@ -28,7 +28,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #050b14;
+            background-color: #060b13;
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -325,8 +325,8 @@
     </style>
 </head>
 <body>
-    <!-- Background canvas (Cyber Security Grid & Network Nodes) -->
-    <canvas id="bg-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+    <!-- Background canvas (Minimalist Cybersecurity Particle Network) -->
+    <canvas id="bg-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:0.12;"></canvas>
 
     <div class="login-container">
         <div class="login-logo-section">
@@ -450,7 +450,7 @@
     </div>
 
     <script>
-        // Cyber Command Room & Selangor Map Simulation (High-Speed & Detailed Upgrade)
+        // Minimalist Cybersecurity Particle Network Animation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -460,263 +460,71 @@
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
+            initParticles();
         });
 
-        // Bounding Box Selangor Coordinates
-        const minLon = 100.75, maxLon = 102.0;
-        const minLat = 2.5, maxLat = 3.9;
-
-        // Key operational nodes (7-9 district nodes with status details)
-        const operNodes = [
-            { name: 'SHAH ALAM (IPK)', lon: 101.5183, lat: 3.0738, status: 'LOCK', color: '#ffd700' },
-            { name: 'KLANG SEC', lon: 101.4492, lat: 3.0333, status: 'SYS_OK', color: '#39ff14' },
-            { name: 'PETALING JAYA', lon: 101.6067, lat: 3.1073, status: 'ACTIVE', color: '#00f0ff' },
-            { name: 'GOMBAK UNIT', lon: 101.6667, lat: 3.2500, status: 'ALERT', color: '#ff3131' },
-            { name: 'KAJANG OPS', lon: 101.7900, lat: 2.9930, status: 'ACTIVE', color: '#00f0ff' },
-            { name: 'SEPANG HQ', lon: 101.6994, lat: 2.7533, status: 'SYS_OK', color: '#39ff14' },
-            { name: 'SABAK BERNAM', lon: 100.8000, lat: 3.8000, status: 'STANDBY', color: '#ffd700' },
-            { name: 'KUALA SELANGOR', lon: 101.2500, lat: 3.3400, status: 'ACTIVE', color: '#00f0ff' },
-            { name: 'HULU SELANGOR', lon: 101.6500, lat: 3.5600, status: 'SYS_OK', color: '#39ff14' }
-        ];
-
-        let selangorGeoJSON = null;
-        let pulseOffset = 0;
-        let radarAngle = 0;
-        let pulseVal = 0;
-
-        // Fetch Selangor GeoJSON for background map rendering
-        fetch('selangor_districts.geojson')
-            .then(r => {
-                if (!r.ok) throw new Error();
-                return r.json();
-            })
-            .then(data => {
-                selangorGeoJSON = data;
-            })
-            .catch(() => console.log('Background GeoJSON loaded offline fallback'));
-
-        // Mercator Projection Mapper to center and scale map dynamically
-        function project(lon, lat) {
-            const mapWidth = maxLon - minLon;
-            const mapHeight = maxLat - minLat;
-            const mapAspect = mapWidth / mapHeight;
-            const screenAspect = width / height;
-            
-            let scale, xOffset, yOffset;
-            
-            if (screenAspect > mapAspect) {
-                // Wide screen: fit by height
-                scale = (height * 0.72) / mapHeight;
-                xOffset = (width - mapWidth * scale) / 2;
-                yOffset = height * 0.14;
-            } else {
-                // Tall screen: fit by width
-                scale = (width * 0.72) / mapWidth;
-                xOffset = width * 0.14;
-                yOffset = (height - mapHeight * scale) / 2;
+        let particles = [];
+        function initParticles() {
+            const particleCount = Math.min(75, Math.floor((width * height) / 18000)) || 25;
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 0.35, // Slow elegant float
+                    vy: (Math.random() - 0.5) * 0.35,
+                    radius: Math.random() * 1.8 + 0.8,
+                    color: Math.random() > 0.4 ? '#00f0ff' : '#0055ff' // Cyan neon & Dark blue particles
+                });
             }
-            
-            const x = xOffset + (lon - minLon) * scale;
-            const y = height - (yOffset + (lat - minLat) * scale); // Invert Y coordinate
-            return { x, y };
-        }
-
-        function drawPolygon(polygonCoords) {
-            polygonCoords.forEach(ring => {
-                if (ring.length === 0) return;
-                const start = project(ring[0][0], ring[0][1]);
-                ctx.moveTo(start.x, start.y);
-                for (let i = 1; i < ring.length; i++) {
-                    const pt = project(ring[i][0], ring[i][1]);
-                    ctx.lineTo(pt.x, pt.y);
-                }
-            });
         }
 
         function draw() {
-            // 1. Draw base tactical dark background
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = '#050b14';
-            ctx.fillRect(0, 0, width, height);
+            ctx.clearRect(0, 0, width, height);
 
-            // 2. Set background graphics opacity to 0.18 for perfect legibility
-            ctx.globalAlpha = 0.18;
-
-            // Faded Digital Grid Overlay
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
-            ctx.lineWidth = 0.5;
-            const gridSize = 60;
+            // Update and draw particles
             ctx.beginPath();
-            for (let x = 0; x < width; x += gridSize) {
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-            }
-            for (let y = 0; y < height; y += gridSize) {
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-            }
-            ctx.stroke();
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
 
-            // Draw grid dots at intersections
-            ctx.fillStyle = '#00f0ff';
-            for (let x = 0; x < width; x += gridSize) {
-                for (let y = 0; y < height; y += gridSize) {
-                    ctx.fillRect(x - 1, y - 1, 2, 2);
-                }
-            }
+                // Screen boundary wrapping (smooth looping)
+                if (p.x < 0) p.x = width;
+                else if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                else if (p.y > height) p.y = 0;
 
-            // Screen center coordinates for radar
-            const cx = width / 2;
-            const cy = height / 2;
-
-            // 3. Cyber Radar Sweep (Centered and spinning at 2x speed)
-            radarAngle += 0.012; // High speed rotation
-            
-            // Draw Radar target circles
-            ctx.strokeStyle = '#00f0ff';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(cx, cy, 120, 0, Math.PI * 2);
-            ctx.arc(cx, cy, 250, 0, Math.PI * 2);
-            ctx.arc(cx, cy, 380, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Radar Crosshairs
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
-            ctx.beginPath();
-            ctx.moveTo(cx - 400, cy);
-            ctx.lineTo(cx + 400, cy);
-            ctx.moveTo(cx, cy - 400);
-            ctx.lineTo(cx, cy + 400);
-            ctx.stroke();
-
-            // Radar Sweep gradient arc
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, 380, radarAngle, radarAngle + 0.5);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
-            ctx.fill();
-
-            // Sweep line glow
-            ctx.strokeStyle = '#00f0ff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.lineTo(cx + 380 * Math.cos(radarAngle + 0.5), cy + 380 * Math.sin(radarAngle + 0.5));
-            ctx.stroke();
-
-            // 4. Detailed Selangor Map boundaries & Running Pulse (Marching neon dashes)
-            if (selangorGeoJSON) {
-                // Static cyan boundaries
-                ctx.strokeStyle = 'rgba(0, 240, 255, 0.12)';
-                ctx.lineWidth = 1.0;
+                ctx.fillStyle = p.color;
                 ctx.beginPath();
-                selangorGeoJSON.features.forEach(feature => {
-                    const coords = feature.geometry.coordinates;
-                    const type = feature.geometry.type;
-                    if (type === 'Polygon') {
-                        drawPolygon(coords);
-                    } else if (type === 'MultiPolygon') {
-                        coords.forEach(poly => drawPolygon(poly));
-                    }
-                });
-                ctx.stroke();
-
-                // Marching neon pulses (2x speed flowing effect)
-                ctx.strokeStyle = '#00f0ff';
-                ctx.lineWidth = 2.0;
-                ctx.setLineDash([40, 160]);
-                ctx.lineDashOffset = -pulseOffset;
-                ctx.beginPath();
-                selangorGeoJSON.features.forEach(feature => {
-                    const coords = feature.geometry.coordinates;
-                    const type = feature.geometry.type;
-                    if (type === 'Polygon') {
-                        drawPolygon(coords);
-                    } else if (type === 'MultiPolygon') {
-                        coords.forEach(poly => drawPolygon(poly));
-                    }
-                });
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset
-            }
-
-            // 5. Operational Nodes & Network Lines (2x speed pulsing)
-            pulseVal += 0.09; // Fast pulse
-            
-            // Draw connecting lines between close operational nodes
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            for (let i = 0; i < operNodes.length; i++) {
-                const pt1 = project(operNodes[i].lon, operNodes[i].lat);
-                for (let j = i + 1; j < operNodes.length; j++) {
-                    const pt2 = project(operNodes[j].lon, operNodes[j].lat);
-                    const dist = Math.hypot(pt1.x - pt2.x, pt1.y - pt2.y);
-                    if (dist < 180) {
-                        ctx.moveTo(pt1.x, pt1.y);
-                        ctx.lineTo(pt2.x, pt2.y);
-                    }
-                }
-            }
-            ctx.stroke();
-
-            // Draw individual nodes
-            operNodes.forEach(node => {
-                const pt = project(node.lon, node.lat);
-                const pulseRadius = 5 + (Math.sin(pulseVal) * 9);
-                
-                // Fast pulsing ring
-                ctx.strokeStyle = node.color;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, pulseRadius, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Core dot
-                ctx.fillStyle = node.color;
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Node tag text
-                ctx.fillStyle = 'rgba(0, 240, 255, 0.35)';
-                ctx.font = '8px monospace';
-                ctx.fillText(`${node.name} [${node.status}]`, pt.x + 8, pt.y + 3);
             });
 
-            // 6. Corner HUD Panels (Fast blink rate)
-            const hudBlink = Math.floor(Date.now() / 200) % 2 === 0;
-            ctx.strokeStyle = '#00f0ff';
-            ctx.fillStyle = '#00f0ff';
-            ctx.lineWidth = 1;
+            // Dynamic Mesh connecting lines
+            ctx.lineWidth = 0.4;
+            for (let i = 0; i < particles.length; i++) {
+                const p1 = particles[i];
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.hypot(dx, dy);
 
-            // Top-Left Panel
-            ctx.strokeRect(30, 30, 160, 45);
-            ctx.font = '9px monospace';
-            ctx.fillText('IPK SELANGOR HUB', 38, 44);
-            ctx.fillText('SYS_AUTH: SECURE_V3.1', 38, 56);
-            ctx.fillStyle = hudBlink ? '#ff3131' : '#050b14';
-            ctx.fillRect(165, 38, 12, 8); // Red blinking indicator
+                    if (dist < 125) {
+                        const alpha = 1.0 - (dist / 125);
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha * 0.32})`;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
 
-            // Top-Right Panel
-            ctx.fillStyle = '#00f0ff';
-            ctx.strokeRect(width - 190, 30, 160, 45);
-            ctx.fillText('MONITORING: ACTIVE', width - 182, 44);
-            ctx.fillText(`NODES: ${operNodes.length} ONLINE`, width - 182, 56);
-            ctx.fillStyle = hudBlink ? '#39ff14' : '#050b14';
-            ctx.fillRect(width - 50, 38, 12, 8); // Green blinking indicator
-
-            // Bottom Left status scan text
-            ctx.fillStyle = hudBlink ? 'rgba(0, 240, 255, 0.3)' : 'rgba(0, 240, 255, 0.1)';
-            ctx.fillText('>> PDRM CYBER CONTROL: LIVE STREAMING...', 30, height - 30);
-
-            // Increment offset
-            pulseOffset += 5.5; // Fast Flow
             requestAnimationFrame(draw);
         }
 
+        initParticles();
         draw();
 
         // Initialize PDRM User Database in localStorage if it doesn't exist
