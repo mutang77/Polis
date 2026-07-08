@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDRM Selangor Crime Analytics Dashboard 2025</title>
+    
+    <!-- Google Fonts: Inter for UI, Orbitron for digital HUD numbers -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Apache ECharts CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+</head>
+<body class="dashboard-theme-dark">
+    <!-- Loader Overlay -->
+    <div id="loader-overlay" class="loader-overlay">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p>Memuatkan Data Portal Jenayah Selangor...</p>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Royal_Malaysian_Police.png" alt="Logo PDRM" class="pdrm-logo">
+                <div class="header-title-container">
+                    <h1 class="main-title">PORTAL ANALISIS JENAYAH IPK SELANGOR</h1>
+                    <p class="sub-title">Sistem Pemantauan Visual & Prestasi Penyelesaian Kes Ibu Pejabat Polis Kontinjen Selangor</p>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="hud-status">
+                    <span class="pulse-indicator"></span>
+                    <span class="hud-status-text">SISTEM AKTIF & DIKEMAS KINI</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="time-widget">
+                    <i class="far fa-clock clock-icon"></i>
+                    <span id="live-time" class="time-display">00:00:00 AM</span>
+                    <span id="live-date" class="date-display">08 Julai 2026</span>
+                </div>
+                
+                <div class="filter-widget">
+                    <label for="ipd-selector" class="filter-label"><i class="fas fa-filter"></i> IPD:</label>
+                    <select id="ipd-selector" class="ipd-select">
+                        <option value="ALL">Semua Daerah (Selangor)</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="dashboard-main">
+            
+            <!-- KPI CARDS ROW -->
+            <section class="kpi-row">
+                <div class="kpi-card" id="kpi-reported">
+                    <div class="kpi-icon-container cyan-glow">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Jumlah Kes Dilaporkan</span>
+                        <h2 class="kpi-value font-hud text-cyan" id="val-reported">0</h2>
+                        <span class="kpi-trend trend-neutral"><i class="fas fa-info-circle"></i> Suku Tahun Pertama 2025</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-solved">
+                    <div class="kpi-icon-container green-glow">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Kes Berjaya Diselesaikan</span>
+                        <h2 class="kpi-value font-hud text-green" id="val-solved">0</h2>
+                        <span class="kpi-trend trend-up" id="val-solved-percent"><i class="fas fa-chart-line"></i> 0% dari reported</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-solverate">
+                    <div class="kpi-icon-container yellow-glow">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Kadar Penyelesaian (KPI)</span>
+                        <h2 class="kpi-value font-hud text-yellow" id="val-solve-rate">0.0%</h2>
+                        <span class="kpi-trend" id="val-solve-status">Kadar Standard Kebangsaan</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-distribution">
+                    <div class="kpi-icon-container red-glow">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Jenayah Kekerasan vs Harta Benda</span>
+                        <div class="kpi-split-view">
+                            <div>
+                                <span class="split-num font-hud text-red" id="val-violent">0</span>
+                                <span class="split-lbl">Kekerasan</span>
+                            </div>
+                            <div class="split-divider"></div>
+                            <div>
+                                <span class="split-num font-hud text-orange" id="val-property">0</span>
+                                <span class="split-lbl">Harta Benda</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHARTS GRID -->
+            <section class="charts-grid">
+                
+                <!-- LEFT PANEL (25% Width) -->
+                <div class="grid-col col-left">
+                    <div class="dashboard-panel chart-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-chart-pie panel-icon"></i> Kategori Utama Jenayah</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chart-category" class="echarts-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-panel chart-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-list-ol panel-icon"></i> Pecahan Jenis Jenayah</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chart-sub-category" class="echarts-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CENTER PANEL (50% Width) - Selangor District Map -->
+                <div class="grid-col col-center">
+                    <div class="dashboard-panel chart-panel main-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3><i class="fas fa-map panel-icon"></i> Peta Jenayah Negeri Selangor</h3>
+                                <span class="panel-subtitle">Kepadatan Kes Dilaporkan Mengikut Daerah Pentadbiran 2025</span>
+                            </div>
+                            <div class="panel-actions">
+                                <div class="map-legend">
+                                    <span class="map-legend-label">Rendah</span>
+                                    <div class="map-legend-gradient"></div>
+                                    <span class="map-legend-label">Tinggi</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body" style="position:relative;">
+                            <div id="chart-map" class="echarts-container"></div>
+                            <!-- Map Tooltip Overlay -->
+                            <div id="map-tooltip" class="map-tooltip" style="display:none;">
+                                <div class="map-tooltip-header">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span id="map-tooltip-district">-</span>
+                                </div>
+                                <div class="map-tooltip-row">
+                                    <span class="map-tt-label">Kes Dilaporkan:</span>
+                                    <span class="map-tt-val text-cyan" id="map-tooltip-reported">0</span>
+                                </div>
+                                <div class="map-tooltip-row">
+                                    <span class="map-tt-label">Kes Selesai:</span>
+                                    <span class="map-tt-val text-green" id="map-tooltip-solved">0</span>
+                                </div>
+                                <div class="map-tooltip-row">
+                                    <span class="map-tt-label">Kadar Selesai:</span>
+                                    <span class="map-tt-val text-yellow" id="map-tooltip-rate">0%</span>
+                                </div>
+                                <div class="map-tooltip-row">
+                                    <span class="map-tt-label">IPD Berkaitan:</span>
+                                    <span class="map-tt-val" id="map-tooltip-ipds" style="font-size:0.7rem;">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL (25% Width) -->
+                <div class="grid-col col-right">
+                    <div class="dashboard-panel chart-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-spider panel-icon"></i> Profil Kadar Selesai (Radar)</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chart-radar" class="echarts-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-panel list-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-skull-crossbones panel-icon"></i> IPD Kepadatan Kes Tertinggi</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="ranking-list" id="risk-ipd-list">
+                                <!-- Dynamically populated list of top IPDs -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- FULL-WIDTH IPD BAR CHART -->
+            <section class="ipd-chart-row">
+                <div class="dashboard-panel chart-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3><i class="fas fa-chart-bar panel-icon"></i> Statistik Prestasi Mengikut Daerah Polis (IPD)</h3>
+                            <span class="panel-subtitle">Perbandingan Jumlah Kes Dilaporkan vs Kes Penyelesaian bagi Semua IPD Selangor</span>
+                        </div>
+                        <div class="panel-actions">
+                            <span class="legend-dot reported-dot"></span> Dilaporkan
+                            <span class="legend-dot solved-dot"></span> Diselesaikan
+                        </div>
+                    </div>
+                    <div class="panel-body" style="min-height: 300px;">
+                        <div id="chart-ipd" class="echarts-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DATA TABLE SECTION (Bottom) -->
+            <section class="table-section">
+                <div class="dashboard-panel table-panel">
+                    <div class="panel-header table-panel-header">
+                        <div class="table-header-left">
+                            <h3><i class="fas fa-database panel-icon"></i> Perincian Rekod Jenayah & Kadar Penyelesaian</h3>
+                            <span class="table-counter" id="table-row-count">Menunjukkan 0 rekod</span>
+                        </div>
+                        <div class="table-header-right">
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="table-search" placeholder="Cari IPD atau sub-kategori...">
+                            </div>
+                            <div class="table-filters">
+                                <select id="category-filter" class="table-filter-select">
+                                    <option value="ALL">Semua Kategori</option>
+                                    <option value="Jenayah Kekerasan (Violent Crime)">Jenayah Kekerasan</option>
+                                    <option value="Jenayah Harta Benda (Property Crime)">Jenayah Harta Benda</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body table-container">
+                        <table class="dashboard-table" id="crime-table">
+                            <thead>
+                                <tr>
+                                    <th data-sort="ipd">Daerah Polis (IPD) <i class="fas fa-sort"></i></th>
+                                    <th data-sort="category">Kategori <i class="fas fa-sort"></i></th>
+                                    <th data-sort="sub_category">Sub-Kategori <i class="fas fa-sort"></i></th>
+                                    <th data-sort="reported" class="text-right">Kes Dilaporkan <i class="fas fa-sort"></i></th>
+                                    <th data-sort="solved" class="text-right">Kes Penyelesaian <i class="fas fa-sort"></i></th>
+                                    <th data-sort="solve_rate" class="text-center" style="width: 250px;">Kadar Penyelesaian <i class="fas fa-sort"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dynamically populated rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Table Pagination -->
+                    <div class="table-pagination">
+                        <div class="pagination-info" id="pagination-info">
+                            Menunjukkan 1-10 dari 150 rekod
+                        </div>
+                        <div class="pagination-controls">
+                            <button id="btn-first-page" class="pag-btn" title="Halaman Pertama"><i class="fas fa-angle-double-left"></i></button>
+                            <button id="btn-prev-page" class="pag-btn" title="Halaman Sebelumnya"><i class="fas fa-angle-left"></i></button>
+                            <span class="page-number" id="current-page-num">1</span>
+                            <button id="btn-next-page" class="pag-btn" title="Halaman Seterusnya"><i class="fas fa-angle-right"></i></button>
+                            <button id="btn-last-page" class="pag-btn" title="Halaman Terakhir"><i class="fas fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- FOOTER -->
+        <footer class="dashboard-footer">
+            <p>&copy; 2026 Polis Diraja Malaysia (PDRM) - Kontinjen Selangor. Semua Hak Cipta Terpelihara.</p>
+            <p class="footer-system-info">Visualisasi Data Mockup PDRM | Reka Bentuk Command Center Premium</p>
+        </footer>
+    </div>
+
+    <!-- Main JS Application script -->
+    <script src="app.js"></script>
+</body>
+</html>
