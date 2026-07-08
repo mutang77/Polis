@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check login session - redirect to login if not authenticated
     const token = sessionStorage.getItem('pdrm_token');
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
     }
 
@@ -764,7 +764,7 @@ function setupLogout() {
     logoutBtn.addEventListener('click', () => {
         sessionStorage.removeItem('pdrm_token');
         sessionStorage.removeItem('pdrm_user');
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
     });
 }
 

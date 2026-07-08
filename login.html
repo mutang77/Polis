@@ -566,7 +566,7 @@
                     sessionStorage.setItem('pdrm_token', token);
                     sessionStorage.setItem('pdrm_user', user.name);
                     sessionStorage.setItem('pdrm_username', username);
-                    window.location.href = '/index.html';
+                    window.location.href = 'index.html';
                 } else {
                     errorText.textContent = 'Nama pengguna atau kata laluan salah. Sila cuba semula.';
                     loginError.classList.add('visible');
@@ -615,7 +615,7 @@
 
         // Check if already logged in
         if (sessionStorage.getItem('pdrm_token')) {
-            window.location.href = '/index.html';
+            window.location.href = 'index.html';
         }
     </script>
 </body>
