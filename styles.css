@@ -107,7 +107,8 @@ body {
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 24px; /* Row gap between every major section */
+    box-sizing: border-box;
 }
 
 /* Dashboard Header — single flat flexbox row */
@@ -332,6 +333,7 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
+    box-sizing: border-box; /* Prevent padding from breaking alignment */
 }
 
 .kpi-card::after {
@@ -451,22 +453,46 @@ body {
     background-color: var(--border-color);
 }
 
-/* Charts Grid Layout */
+/* ============================================================
+   Charts Grid — Strict Equal-Height 3-Column Layout
+   ============================================================ */
 .charts-grid {
     display: grid;
     grid-template-columns: 25% 50% 25%;
-    gap: 18px;
-    align-items: stretch;
+    gap: 20px;
+    align-items: stretch;   /* Force all 3 columns to same height */
+    box-sizing: border-box;
 }
 
+/* Each column is a flex column so panels inside stretch vertically */
 .grid-col {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
+    min-height: 0;          /* Allows flex children to shrink within grid row */
+    box-sizing: border-box;
+}
+
+/* Center column: single panel fills the full column height */
+.col-center {
+    /* inherits from .grid-col */
+}
+
+.col-center .dashboard-panel {
+    flex: 1 1 auto;
     min-height: 0;
 }
 
-/* Panel Design */
+/* Left & Right columns: each panel shares height equally */
+.col-left .dashboard-panel,
+.col-right .dashboard-panel {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+/* ============================================================
+   Panel Design (shared by all chart boxes)
+   ============================================================ */
 .dashboard-panel {
     background-color: var(--bg-panel);
     border: 1px solid var(--border-color);
@@ -476,6 +502,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: border-color var(--transition-speed) ease;
+    box-sizing: border-box; /* Padding doesn't break height calculations */
 }
 
 .dashboard-panel:hover {
@@ -488,6 +515,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;         /* Header stays fixed height, never squished */
+    box-sizing: border-box;
 }
 
 .panel-header h3 {
@@ -516,38 +545,20 @@ body {
 
 .panel-body {
     padding: 15px;
-    flex-grow: 1;
+    flex: 1 1 auto;         /* Grows to fill remaining panel height */
     position: relative;
-}
-
-.chart-panel .panel-body {
-    min-height: 270px;
-    flex: 1;
-}
-
-.main-panel .panel-body {
-    min-height: 600px; /* Center panel has larger height */
-    flex: 1;
-}
-
-/* Ensure left/right side panels fill available vertical space symmetrically */
-.col-left .dashboard-panel,
-.col-right .dashboard-panel {
-    flex: 1;
     min-height: 0;
+    box-sizing: border-box;
 }
 
-.col-left,
-.col-right {
-    height: 100%;
+/* Side chart panels: min-height so they're never too short */
+.chart-panel .panel-body {
+    min-height: 260px;
 }
 
-.col-center {
-    height: 100%;
-}
-
-.col-center .dashboard-panel {
-    height: 100%;
+/* Center map panel: taller to anchor the row height */
+.main-panel .panel-body {
+    min-height: 580px;
 }
 
 .echarts-container {
