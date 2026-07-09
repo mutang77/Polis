@@ -107,7 +107,47 @@ body {
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 24px; /* Row gap between every major section */
+    gap: 0;                 /* No auto-gap: we control spacing per-row explicitly */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+
+
+/* ── Row 1: Toolbar ── small gap above (tight to header) */
+.toolbar-row {
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Row 2: KPI Cards ── 20px gap above toolbar */
+/* (full grid properties below at 'KPI Cards Styles') */
+.kpi-row {
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Row 3: Charts Grid (3 columns) ── 20px gap above KPI row */
+/* (full grid properties below at 'Charts Grid') */
+.charts-grid {
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Row 4: Full-Width IPD Bar Chart ── 20px gap above */
+.ipd-chart-row {
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Row 5: Data Table ── 20px gap above */
+.table-section {
+    margin-top: 20px;
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -124,6 +164,8 @@ body {
     backdrop-filter: blur(10px);
     position: relative;
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .dashboard-header::before {
@@ -312,7 +354,7 @@ body {
     box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
 }
 
-/* KPI Cards Styles */
+/* KPI Cards Styles — grid layout (margin-top set in row spacing block above) */
 .kpi-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
