@@ -315,7 +315,8 @@ body {
 .kpi-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    gap: 22px;
+    padding: 2px 0;
 }
 
 .kpi-card {
@@ -454,13 +455,15 @@ body {
 .charts-grid {
     display: grid;
     grid-template-columns: 25% 50% 25%;
-    gap: 15px;
+    gap: 18px;
+    align-items: stretch;
 }
 
 .grid-col {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 18px;
+    min-height: 0;
 }
 
 /* Panel Design */
@@ -519,10 +522,32 @@ body {
 
 .chart-panel .panel-body {
     min-height: 270px;
+    flex: 1;
 }
 
 .main-panel .panel-body {
-    min-height: 570px; /* Center panel has larger height */
+    min-height: 600px; /* Center panel has larger height */
+    flex: 1;
+}
+
+/* Ensure left/right side panels fill available vertical space symmetrically */
+.col-left .dashboard-panel,
+.col-right .dashboard-panel {
+    flex: 1;
+    min-height: 0;
+}
+
+.col-left,
+.col-right {
+    height: 100%;
+}
+
+.col-center {
+    height: 100%;
+}
+
+.col-center .dashboard-panel {
+    height: 100%;
 }
 
 .echarts-container {
